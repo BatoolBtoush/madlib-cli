@@ -1,4 +1,4 @@
-
+import re
 
 def welcome():
     line_1= "{:^111}"
@@ -14,72 +14,47 @@ def welcome():
 
 
 
-def prompt_user(path):
-    try:
-        f = open(path)
-    except:
-        print('there\'s an error')
-    else:
-        content = f.read()
-        f.close()
-        with open("./assets/madlib_story.txt",'w') as f:
-            f.write(content.format(
-
-                adjective_1 = input('Please enter an adjactive '),
-                adjective_2 = input('Please enter another adjactive '),
-                past_verb = input('Please enter a past tense verb '),
-                first_name1 = input('Please enter another first name '),
-                adjective_3 = input('Please enter another adjactive '),
-                adjective_4 = input('Please enter another adjactive '),
-                noun_1 = input('Please enter a plural noun '),
-                large_animal = input('Please enter a large animal '),
-                small_animal = input('Please enter a small animal '),
-                girl_name = input('Please enter a a girl\'s name '),
-                adjective_5 = input('Please enter another adjactive '),
-                noun_2 = input('Please enter a plural noun '),
-                adjective_6 = input('Please enter another adjactive '),
-                noun_3 = input('Please enter a plural noun '),
-                number_1 = input('Please enter a number between 1-50 '),
-                first_name2 = input('Please enter a first name with \'s '),
-                number_2 = input('Please enter a number '),
-                noun_4 = input('Please enter a plural noun '),
-                number_3 = input('Please enter a number '),
-                noun_5 = input('Please enter a plural noun '),
-                    )
-
-            )
-    finally:
-        return content
-
-
 
 def read_template(path):
     try:
         file = open(path)
     except FileNotFoundError:
-        content = "The file could not be found"
+        raise FileNotFoundError('Error: File could not be found')
     else:
         content = file.read()
         file.close()    
-    finally:
         return content        
    
     
 
-
 def parse_template(content):
-    words =[]
-    for word in content:
-       user_input = input(word +'')
-       words.append(user_input)
-    return words,content
+    
+    parse= re.findall("{(.+?)}",content)
+    for part in parse:    
+        content= re.sub(part, "",content) 
+    return content, tuple(parse)
 
 
+def user_input(parse):
+    user_inputs = []
+    for part in parse:
+      printed_out = input(f'Please type in {part}: ')
+      user_inputs.append(printed_out)
+    return user_inputs
 
 
+def merge(content, user_input):
+    result = content.format(*user_input)
 
-def merge():
-    pass
+    # with open('../madlib_cli/assets/filled_template.txt','w') as output:
+    #     output.write(result)
+    return result
+
+def filled_template(content):
+    print(content)
+    ouptut = open('../madlib_cli/assets/filled_template.txt','w')
+    ouptut.write(content)
+    ouptut.close()
 
 
 
@@ -87,10 +62,13 @@ def merge():
 
 if __name__ == "__main__":
     welcome()
-    content =  read_template("./assets/madlib_story.txt")
-    user = prompt_user("./assets/madlib_story.txt")
+    read = read_template('../madlib_cli/assets/madlib.txt')
+    parse, printed = parse_template(read)
+    input  = user_input(printed)
+    merged = merge (parse,input)
+    # print(merged)
+    filled_template(merged)
     # print(txt)
-    print(parse_template(user))
     # print(parsed)
 
 
